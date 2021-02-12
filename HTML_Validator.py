@@ -13,7 +13,7 @@ def validate_html(html):
     '''
     try:
         ext_tags = _extract_tags(html)
-    except Exception as e:
+    except Exception:
         return False
     stack = []
     balanced = True
