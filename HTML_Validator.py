@@ -11,23 +11,20 @@ def validate_html(html):
     >>> validate_html('<strong>example')
     False
     '''
-    try:
-        ext_tags = _extract_tags(html)
-    except Exception:
-        return False
     stack = []
     balanced = True
-    for index, tag in enumerate(ext_tags):
+    
+    for tag in _extract_tags(html):
         if '/' not in tag:
             stack.append(tag)
         else:
             if stack == []:
                 balanced = False
             else:
-                top = stack.pop()
-                if tag[2:] != top[1:]:
+                last = stack.pop()
+                if last[2:] not in tag[1:]:
                     balanced = False
-    if balanced and stack == []:
+    if balanced and (stack == []):
         return True
     else:
         return False
@@ -55,15 +52,17 @@ def _extract_tags(html):
     >>> _extract_tags('Python <strong>rocks</strong>!')
     ['<strong>', '</strong>']
     '''
-    tags = []
-    length = len(html) - 1
-    for i in range(length):
-        if html[i] == '<':
-            string = ''
-            j = i
-            while html[j] != '>' and j < length:
-                string += html[j]
-                j += 1
+    stack = []
+
+    for i in range(len(html)):
+        string = ''
+        tag = html[i]
+
+        if tag == '<' :
+            while tag != '>':
+                string += tag
+                i += 1
+                tag = html[i]
             string += '>'
-            tags.append(string)
-    return tags
+            stack.append(string)
+    return stack
