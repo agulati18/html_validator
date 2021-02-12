@@ -11,9 +11,13 @@ def validate_html(html):
     >>> validate_html('<strong>example')
     False
     '''
+    try:
+        extracted = _extract_tags(html)
+    except Exception:
+        return False
     stack = []
     balanced = True
-    for tag in _extract_tags(html):
+    for tag in extracted:
         if '/' not in tag:
             stack.append(tag)
         else:
@@ -21,7 +25,7 @@ def validate_html(html):
                 balanced = False
             else:
                 last = stack.pop()
-                if last[2:] not in tag[1:]:
+                if tag[2:] not in last[1:]:
                     balanced = False
     if balanced and (stack == []):
         return True
@@ -52,16 +56,21 @@ def _extract_tags(html):
     ['<strong>', '</strong>']
     '''
     stack = []
-
-    for i in range(len(html)):
-        string = ''
-        tag = html[i]
-
-        if tag == '<':
-            while tag != '>':
-                string += tag
+    length = len(html) - 1
+    if ('<' in html) and ('>' in html):
+        for i in range(length):
+            empty = ''
+            if html[i] == '<':
+                empty += html[i]
                 i += 1
-                tag = html[i]
-            string += '>'
-            stack.append(string)
-    return stack
+
+                while html[i] != '>' and i < length:
+                    empty += html[i]
+                    i += 1
+                empty += '>'
+                stack.append(empty)
+        return stack
+    elif ('<' in html):
+        raise ValueError('found < without an >')
+    else:
+        return []
